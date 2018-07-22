@@ -27,6 +27,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float CrosshairYLocation = 0.33333f;
+
+	UPROPERTY(EditAnywhere)
+	float LineTraceRange = 1000000.f;
 	
 	ATank* GetControlledTank() const;
 
@@ -35,4 +38,6 @@ private:
 	void AimTowardsCrosshair();
 
 	bool GetSightRayHitLocation(FVector& HitLocation_OUT) const;
+	bool GetLookDirection(FVector2D ScreenLocation, FVector& LookDirection_OUT) const;
+	bool GetLookVectorHitLocation(FVector LookDirection, FVector& WorldHitLocation) const;
 };
