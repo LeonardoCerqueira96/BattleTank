@@ -21,10 +21,13 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	void SetBarrelReference(UStaticMeshComponent* BarrelToSet);
+	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void AimAt(FVector AimLocation);
 		
-	
+private:
+	UStaticMeshComponent* Barrel = nullptr;
 };
