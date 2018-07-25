@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
+#include "Public/Tank.h"
 #include "Engine/World.h"
 #include "CollisionQueryParams.h"
 
@@ -51,19 +52,10 @@ bool ATankPlayerController::GetSightRayHitLocation(FVector& HitLocation_OUT) con
 	FVector LookDirection;
 	if (GetLookDirection(ScreenLocation, LookDirection))
 	{
-		FVector WorldHitLocation;
-		if (GetLookVectorHitLocation(LookDirection, WorldHitLocation))
-		{
-			HitLocation_OUT = WorldHitLocation;
-			return true;
-		}
-		else
-		{
-			HitLocation_OUT = FVector(INT64_MIN);
-		}
+		GetLookVectorHitLocation(LookDirection, HitLocation_OUT);
 	}
 
-	return false;
+	return true;
 }
 
 bool ATankPlayerController::GetLookDirection(FVector2D ScreenLocation, FVector& LookDirection_OUT) const
@@ -95,7 +87,7 @@ bool ATankPlayerController::GetLookVectorHitLocation(FVector LookDirection, FVec
 		FCollisionResponseParams::DefaultResponseParam
 	);
 
-	WorldHitLocation = HitResult.Location;
+	WorldHitLocation = bTraceHitSomething ? HitResult.Location : FVector(0.f);
 	return bTraceHitSomething;
 }
 
