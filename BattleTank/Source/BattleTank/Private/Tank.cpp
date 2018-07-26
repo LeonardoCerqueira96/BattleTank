@@ -39,17 +39,20 @@ void ATank::BeginPlay()
 
 void ATank::FireProjectile()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Firing projectile"));
+	bool bIsReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTime;
 
-	if (!Barrel) { return; }
+	if (Barrel && bIsReloaded)
+	{
+		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>
+		(
+			ProjectileBlueprint,
+			Barrel->GetSocketLocation(FName("Projectile")),
+			Barrel->GetSocketRotation(FName("Projectile"))
+		);
+		Projectile->LaunchProjectile(LaunchSpeed);
 
-	AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>
-	(
-		ProjectileBlueprint,
-		Barrel->GetSocketLocation(FName("Projectile")),
-		Barrel->GetSocketRotation(FName("Projectile"))
-	);
-	Projectile->LaunchProjectile(LaunchSpeed);
+		LastFireTime = FPlatformTime::Seconds();
+	}
 }
 
 // Called to bind functionality to input
