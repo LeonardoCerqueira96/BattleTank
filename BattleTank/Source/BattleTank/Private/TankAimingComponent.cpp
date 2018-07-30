@@ -8,6 +8,20 @@
 #include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
 
+UTankAimingComponent::UTankAimingComponent()
+{
+	bWantsBeginPlay = true;
+	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UTankAimingComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// So that first fire is after initial reload
+	LastFireTime = FPlatformTime::Seconds();
+}
+
 void UTankAimingComponent::Initialise(UTankBarrel* BarrelToSet, UTankTurret* TurretToSet)
 {
 	Barrel = BarrelToSet;
@@ -35,16 +49,17 @@ void UTankAimingComponent::AimAt(FVector AimLocation)
 	if (bHasAimSolution)
 	{
 		FVector AimDirection = OutLaunchVelocity.GetSafeNormal();
-		MoveBarrelTowards(AimDirection);
+		CurrentTargetDirection = AimDirection;
+		MoveBarrelTowardsDirection();
 	}
 }
 
-void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
+void UTankAimingComponent::MoveBarrelTowardsDirection()
 {
 	if (!ensure(Barrel && Turret)) { return; }
 	
 	FRotator BarrelRotator = Barrel->GetForwardVector().Rotation();
-	FRotator DeltaRotator = AimDirection.Rotation() - BarrelRotator;
+	FRotator DeltaRotator = CurrentTargetDirection.Rotation() - BarrelRotator;
 
 	Barrel->Elevate(DeltaRotator.Pitch);
 	Turret->Turn(DeltaRotator.Yaw);
@@ -52,9 +67,7 @@ void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
 
 void UTankAimingComponent::FireProjectile()
 {
-	bool bIsReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTime;
-
-	if (ensure(Barrel) && bIsReloaded)
+	if (ensure(Barrel) && FiringState != EFiringState::Reloading)
 	{
 		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>
 		(
@@ -65,6 +78,31 @@ void UTankAimingComponent::FireProjectile()
 		Projectile->LaunchProjectile(LaunchSpeed);
 
 		LastFireTime = FPlatformTime::Seconds();
+	}
+}
+
+bool UTankAimingComponent::IsBarrelMoving() const
+{
+	if (!ensure(Barrel)) { return false; }
+	
+	return !CurrentTargetDirection.Equals(Barrel->GetForwardVector(), 0.01f);
+}
+
+void UTankAimingComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if ((FPlatformTime::Seconds() - LastFireTime) < ReloadTime)
+	{
+		FiringState = EFiringState::Reloading;
+	}
+	else if (IsBarrelMoving())
+	{
+		FiringState = EFiringState::Aiming;
+	}
+	else
+	{
+		FiringState = EFiringState::Locked;
 	}
 }
 
