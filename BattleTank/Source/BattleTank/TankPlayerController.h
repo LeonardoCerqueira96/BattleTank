@@ -6,8 +6,6 @@
 #include "GameFramework/PlayerController.h"
 #include "TankPlayerController.generated.h"
 
-class ATank;
-
 /**
  * 
  */
@@ -31,8 +29,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float LineTraceRange = 1000000.f;
-	
-	ATank* GetControlledTank() const;
 
 	// Start the tank moving the barrel so that a shot would hit where
 	// the crosshair intersects the world

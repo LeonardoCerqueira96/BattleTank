@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
-#include "Public/Tank.h"
+#include "TankAimingComponent.h"
 #include "Engine/World.h"
 #include "CollisionQueryParams.h"
 
@@ -17,19 +17,14 @@ void ATankPlayerController::Tick(float DeltaTime)
 	AimTowardsCrosshair();
 }
 
-ATank* ATankPlayerController::GetControlledTank() const
-{
-	return Cast<ATank>(GetPawn());
-}
-
 void ATankPlayerController::AimTowardsCrosshair()
 {
-	if (!GetControlledTank()) { return; }
+	if (!ensure(GetPawn())) { return; }
 
 	FVector HitLocation;
 	if (GetSightRayHitLocation(HitLocation))
 	{
-		GetControlledTank()->AimAt(HitLocation);
+		GetPawn()->FindComponentByClass<UTankAimingComponent>()->AimAt(HitLocation);
 	}
 }
 
@@ -65,7 +60,7 @@ bool ATankPlayerController::GetLookVectorHitLocation(FVector LookDirection, FVec
 	FHitResult HitResult;
 	FVector LineTraceStart = PlayerCameraManager->GetCameraLocation();
 	FVector LineTraceEnd = LineTraceStart + LookDirection * LineTraceRange;
-	FCollisionQueryParams QueryParams = FCollisionQueryParams(NAME_None, false, GetControlledTank());
+	FCollisionQueryParams QueryParams = FCollisionQueryParams(NAME_None, false, GetPawn());
 
 	bool bTraceHitSomething = GetWorld()->LineTraceSingleByChannel
 	(
