@@ -62,7 +62,13 @@ void UTankAimingComponent::MoveBarrelTowardsDirection()
 	FRotator DeltaRotator = CurrentTargetDirection.Rotation() - BarrelRotator;
 
 	Barrel->Elevate(DeltaRotator.Pitch);
-	Turret->Turn(DeltaRotator.Yaw);
+	
+	float YawAmount = DeltaRotator.Yaw;
+	if (FMath::Abs(YawAmount) > 180.f)
+	{
+		YawAmount -= FMath::Sign(YawAmount) * 360.f;
+	}
+	Turret->Turn(YawAmount);
 }
 
 void UTankAimingComponent::FireProjectile()
