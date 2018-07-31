@@ -13,7 +13,8 @@ enum class EFiringState : uint8
 { 
 	Reloading, 
 	Aiming, 
-	Locked 
+	Locked,
+	OutOfAmmo
 };
 
 class UTankBarrel;
@@ -36,6 +37,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Firing)
 	void FireProjectile();
 
+	EFiringState GetFiringState() const;
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 		
@@ -44,6 +47,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = State)
 	EFiringState FiringState = EFiringState::Reloading;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = Firing)
+	int32 AmmoAmount = 10;
 
 private:
 	// The initial projectile launch speed

@@ -16,11 +16,16 @@ void ATankAIController::Tick(float DeltaTime)
 
 	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 	APawn* ControlledPawn = GetPawn();
+	UTankAimingComponent* AimingComponent = ControlledPawn->FindComponentByClass<UTankAimingComponent>();
 
 	if (ensure(PlayerPawn))
 	{
-		ControlledPawn->FindComponentByClass<UTankAimingComponent>()->AimAt(PlayerPawn->GetActorLocation());
-		ControlledPawn->FindComponentByClass<UTankAimingComponent>()->FireProjectile();
+		AimingComponent->AimAt(PlayerPawn->GetActorLocation());
+		
+		if (AimingComponent->GetFiringState() == EFiringState::Locked)
+		{
+			AimingComponent->FireProjectile();
+		}
 
 		MoveToActor(PlayerPawn, AcceptanceRadius);
 	}
